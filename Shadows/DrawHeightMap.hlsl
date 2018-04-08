@@ -107,6 +107,11 @@ void PSMain(const PSInput input, out PSOutput output)
 {
 	// Transform the pixel into light space
 	float4 lightSpace = mul(input.posWorld, g_shadowMatrix);
+	if (lightSpace.z < 0)
+	{
+		output.colour = input.colour;
+		return;
+	}
 
 	// Perform perspective correction
 	lightSpace = lightSpace / lightSpace.w;
