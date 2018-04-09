@@ -290,15 +290,33 @@ void Application::RenderShadow()
 	// You will need to calculate fovy, zn and zf instead of using these default values:
 	float fovy = 0.8f;
 	float zn = 1.0f;
-	float zf = 1000.0f;
+	float zf = 100.0f;
 	float aspect = RENDER_TARGET_WIDTH / RENDER_TARGET_HEIGHT;
 	// You will find the following constants (defined above) useful:
 	// RENDER_TARGET_WIDTH, RENDER_TARGET_HEIGHT, AEROPLANE_RADIUS
 	//*************************************************************************
-	XMFLOAT3 vTemp2 = m_shadowCastingLightPosition;
-	XMVECTOR vecLightPos = XMLoadFloat3(&vTemp2);
+
+	// STEP 3:
+	// Manipulate the texture RT so it occupys as much of the box regardless of the box
+	// Take the FOV down on the light cam
+	// Zoom right in on it too
+	// DO in Application::RenderShadow();
+
+	// Calculate an optimal near, far, fov to contain whole of the plane
+	// The plane has a radius, use this too help
+	// diff between light pos and plane, then add the radius for far plane, take away for the close plane
+	// make a triangle between i
+	// use inverse tangent (atan) to get fov?!
+
+
+	// Sample render target to see if this pixel is in shadow
+
+	// If it is then alpha blend between final colour and shadow colour
+
+	XMVECTOR vecLightPos = XMLoadFloat3(&m_shadowCastingLightPosition);
 	XMVECTOR vecLightDir = XMVector3Normalize(vPlanePos - vecLightPos);
 
+	//gets the plane from the plane point along its radius towards the light direction
 	XMVECTOR vecNearPlane = AEROPLANE_RADIUS * -vecLightDir + vPlanePos;
 	XMVECTOR vecFarPlane =  AEROPLANE_RADIUS * vecLightDir + vPlanePos;
 
@@ -308,16 +326,12 @@ void Application::RenderShadow()
 	XMVECTOR vecCamNearLength = XMVector3Length(vecCamNear);
 	XMVECTOR vecCamFarLength = XMVector3Length(vecCamFar);
 
-	XMFLOAT3 nearPlane;
-	XMFLOAT3 farPlane;
-	XMStoreFloat3(&nearPlane, vecCamNearLength);
-	XMStoreFloat3(&farPlane, vecCamFarLength);
+	zn = XMVectorGetX(vecCamNearLength);
+	zf = XMVectorGetX(vecCamFarLength);
 
-	zn = nearPlane.x;
-	zf = farPlane.x;
-	fovy = atan2(RENDER_TARGET_HEIGHT, zn);
+	fovy = sqrt(atan2(100, zn * zf - 150));
 
-
+	dprintf("%f\n", fovy);
 
 	XMMATRIX projMtx;
 	projMtx = XMMatrixPerspectiveFovLH(fovy, aspect, zn, zf);

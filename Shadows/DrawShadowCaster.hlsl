@@ -26,6 +26,6 @@ void VSMain(const VSInput input, out PSInput output)
 
 void PSMain(const PSInput input, out PSOutput output)
 {
-	// Draw a pixel colour other than black
-	output.colour = float4(1, 0, 0, 0);
+	// Draw a pixel colour other than black with opacity on w
+	output.colour = float4(1, 0, 0, 0.3f);
 }

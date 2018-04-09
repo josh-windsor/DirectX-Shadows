@@ -93,10 +93,7 @@ void VSMain(const VSInput input, out PSInput output)
 	output.pos = mul(input.pos, g_WVP);
 	output.posWorld = mul(input.pos, g_W);
 	
-
-	
 	// You also need to pass through the untransformed world position to the PS
-
 	float3 worldNormal = mul(input.normal, g_InvXposeW);
 
 	output.colour = input.colour * GetLightingColour(input.pos, normalize(worldNormal));
@@ -107,6 +104,8 @@ void PSMain(const PSInput input, out PSOutput output)
 {
 	// Transform the pixel into light space
 	float4 lightSpace = mul(input.posWorld, g_shadowMatrix);
+
+	//removes the backward shadow
 	if (lightSpace.z < 0)
 	{
 		output.colour = input.colour;
@@ -122,7 +121,7 @@ void PSMain(const PSInput input, out PSOutput output)
 	lightSpace.y = 1 - lightSpace.y;
 
 	// Sample render target to see if this pixel is in shadow
-	float pixel = g_shadowTexture.Sample(g_shadowSampler, lightSpace).x;
+	float pixel = g_shadowTexture.Sample(g_shadowSampler, lightSpace).w;
 	// If it is then alpha blend between final colour and shadow colour
 	output.colour = lerp(input.colour, g_shadowColour, pixel);
 }
